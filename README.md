@@ -51,20 +51,17 @@ npm install
 
 ### 2. Configure environment variables
 
-Create a `.env.local` file in the project root:
+Create a `.env.local` file in the project root for Next.js:
 
 ```env
-# NextAuth
+# NextAuth — required for sessions to work
 NEXTAUTH_SECRET=your-secret-here-change-in-production
 NEXTAUTH_URL=http://localhost:3000
-
-# SQLite database file path (relative to project root)
-DATABASE_URL="file:./dev.db"
 ```
 
 > **Generate a secret:** `openssl rand -base64 32`
 
-The `.env` file (also at the root) is used by the Prisma CLI. It already contains `DATABASE_URL="file:./dev.db"` and should be left as-is for local development.
+> **Database URL:** `prisma.config.ts` defaults to `file:./dev.db` when `DATABASE_URL` is not set, so no extra env file is needed for local SQLite. If you want to override the path, add `DATABASE_URL="file:./dev.db"` to a `.env` file (not `.env.local` — Prisma reads `.env` directly, not Next.js env files).
 
 ### 3. Set up the database
 
