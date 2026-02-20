@@ -298,16 +298,23 @@ function CreateProgramDialog() {
 export default function ProgramsPage() {
   const [search, setSearch] = React.useState("")
 
-  const filterPrograms = (tab: string) => {
-    return programs.filter((p) => {
-      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
-      if (tab === "all") return matchesSearch
-      if (tab === "strength") return matchesSearch && p.type === "STRENGTH"
-      if (tab === "sport") return matchesSearch && p.type === "SPORT_SPECIFIC"
-      if (tab === "drafts") return matchesSearch && p.status === "Draft"
-      return matchesSearch
-    })
-  }
+  const filtered = React.useMemo(() => {
+    const q = search.toLowerCase()
+    const bySearch = programs.filter((p) => p.name.toLowerCase().includes(q))
+    return {
+      all: bySearch,
+      strength: bySearch.filter((p) => p.type === "STRENGTH"),
+      sport: bySearch.filter((p) => p.type === "SPORT_SPECIFIC"),
+      drafts: bySearch.filter((p) => p.status === "Draft"),
+    }
+  }, [search])
+
+  const tabs = [
+    { value: "all", label: `All (${programs.length})`, items: filtered.all },
+    { value: "strength", label: `Strength (${programs.filter((p) => p.type === "STRENGTH").length})`, items: filtered.strength },
+    { value: "sport", label: `Sport-Specific (${programs.filter((p) => p.type === "SPORT_SPECIFIC").length})`, items: filtered.sport },
+    { value: "drafts", label: `Drafts (${programs.filter((p) => p.status === "Draft").length})`, items: filtered.drafts },
+  ]
 
   return (
     <AppShell role="COACH" userName="Alex Johnson" userEmail="alex@athleteos.com">
@@ -326,16 +333,17 @@ export default function ProgramsPage() {
         {/* Search & Filter */}
         <div className="flex items-center gap-3 mb-6">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input
               placeholder="Search programs..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
+              aria-label="Search programs"
             />
           </div>
           <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="h-4 w-4" />
+            <Filter className="h-4 w-4" aria-hidden="true" />
             Filter
           </Button>
         </div>
@@ -343,21 +351,20 @@ export default function ProgramsPage() {
         {/* Tabs */}
         <Tabs defaultValue="all">
           <TabsList className="mb-6">
-            <TabsTrigger value="all">All ({programs.length})</TabsTrigger>
-            <TabsTrigger value="strength">Strength ({programs.filter((p) => p.type === "STRENGTH").length})</TabsTrigger>
-            <TabsTrigger value="sport">Sport-Specific ({programs.filter((p) => p.type === "SPORT_SPECIFIC").length})</TabsTrigger>
-            <TabsTrigger value="drafts">Drafts ({programs.filter((p) => p.status === "Draft").length})</TabsTrigger>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+            ))}
           </TabsList>
 
-          {["all", "strength", "sport", "drafts"].map((tab) => (
-            <TabsContent key={tab} value={tab}>
+          {tabs.map(({ value, items }) => (
+            <TabsContent key={value} value={value}>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filterPrograms(tab).map((program) => (
+                {items.map((program) => (
                   <ProgramCard key={program.id} program={program} />
                 ))}
-                {filterPrograms(tab).length === 0 && (
+                {items.length === 0 && (
                   <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-                    <BookOpen className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                    <BookOpen className="h-12 w-12 text-muted-foreground/30 mb-4" aria-hidden="true" />
                     <p className="text-muted-foreground font-medium">No programs found</p>
                     <p className="text-sm text-muted-foreground/60 mt-1">Try adjusting your search or create a new program</p>
                   </div>

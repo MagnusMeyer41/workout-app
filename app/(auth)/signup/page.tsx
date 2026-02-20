@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Eye, EyeOff, ArrowRight, Loader2, Dumbbell, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils"
 type Role = "COACH" | "PLAYER"
 
 export default function SignupPage() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirm, setShowConfirm] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -27,9 +29,10 @@ export default function SignupPage() {
     e.preventDefault()
     if (form.password !== form.confirm) return
     setIsLoading(true)
+    // Simulate signup delay — replace with real API call when wiring backend
     await new Promise((r) => setTimeout(r, 1200))
     setIsLoading(false)
-    window.location.href = "/dashboard"
+    router.push("/dashboard")
   }
 
   const roles = [
@@ -96,10 +99,12 @@ export default function SignupPage() {
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
             </div>
@@ -118,10 +123,12 @@ export default function SignupPage() {
                 />
                 <button
                   type="button"
+                  aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
+                  aria-pressed={showConfirm}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setShowConfirm(!showConfirm)}
                 >
-                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirm ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
               {form.confirm && form.password !== form.confirm && (
