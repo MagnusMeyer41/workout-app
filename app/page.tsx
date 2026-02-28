@@ -1,7 +1,19 @@
-import { redirect } from "next/navigation"
+import { LandingNavbar } from "@/components/landing/navbar";
+import { HeroSection } from "@/components/landing/hero";
+import { FeaturesSection } from "@/components/landing/features";
+import { CoreFeaturesSection } from "@/components/landing/core-features";
+import { Footer } from "@/components/ui/footer-section";
 
 export default function RootPage() {
-  // In production this would check session and redirect accordingly
-  // For now, redirect unauthenticated users to login
-  redirect("/login")
+  return (
+    <main className="min-h-screen bg-[var(--background)]">
+      <LandingNavbar />
+      <div className="pt-16">
+        <HeroSection />
+        <FeaturesSection />
+        <CoreFeaturesSection />
+        <Footer />
+      </div>
+    </main>
+  );
 }
