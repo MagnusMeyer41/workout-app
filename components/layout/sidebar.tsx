@@ -17,10 +17,14 @@ import {
   Menu,
   X,
   ChevronRight,
+  Dumbbell,
+  Award,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { NotificationBell } from "./notification-bell"
+import { signOut } from "next-auth/react"
 
 type Role = "SUPER_ADMIN" | "COACH" | "PLAYER"
 
@@ -33,13 +37,16 @@ interface NavItem {
 const coachNav: NavItem[] = [
   { label: "Home", href: "/home", icon: Home },
   { label: "Programs", href: "/programs", icon: BookOpen },
+  { label: "Exercises", href: "/exercises", icon: Dumbbell },
   { label: "Players", href: "/players", icon: Users },
   { label: "Team Management", href: "/team-management", icon: Shield },
 ]
 
 const playerNav: NavItem[] = [
   { label: "Home", href: "/home", icon: Home },
+  { label: "Schedule", href: "/schedule", icon: Calendar },
   { label: "Sessions", href: "/sessions", icon: Calendar },
+  { label: "Benchmarks", href: "/benchmarks", icon: Award },
   { label: "Progress", href: "/progress", icon: TrendingUp },
 ]
 
@@ -47,6 +54,7 @@ const adminNav: NavItem[] = [
   { label: "Home", href: "/home", icon: Home },
   { label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Organizations", href: "/organizations", icon: Building2 },
+  { label: "Exercises", href: "/exercises", icon: Dumbbell },
 ]
 
 function getNav(role: Role): NavItem[] {
@@ -67,10 +75,23 @@ interface SidebarContentProps extends SidebarProps {
   onNavClick?: () => void
 }
 
-function SidebarContent({ role, userName = "Alex Johnson", userEmail = "alex@athleteos.com", userImage, pathname, onNavClick }: SidebarContentProps) {
+function SidebarContent({
+  role,
+  userName = "Athlete",
+  userEmail = "",
+  userImage,
+  pathname,
+  onNavClick,
+}: SidebarContentProps) {
   const navItems = getNav(role)
-  const roleLabel = role === "SUPER_ADMIN" ? "Super Admin" : role === "COACH" ? "Coach" : "Player"
-  const initials = userName.split(" ").map((n) => n[0]).join("").slice(0, 2)
+  const roleLabel =
+    role === "SUPER_ADMIN" ? "Super Admin" : role === "COACH" ? "Coach" : "Player"
+  const initials = (userName ?? "A")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div className="flex h-full flex-col">
@@ -81,7 +102,9 @@ function SidebarContent({ role, userName = "Alex Johnson", userEmail = "alex@ath
         </div>
         <div>
           <span className="text-base font-bold tracking-tight text-foreground">AthleteOS</span>
-          <div className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">{roleLabel}</div>
+          <div className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">
+            {roleLabel}
+          </div>
         </div>
       </div>
 
@@ -108,12 +131,17 @@ function SidebarContent({ role, userName = "Alex Johnson", userEmail = "alex@ath
                 )}
               >
                 {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-full" aria-hidden="true" />
+                  <span
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-full"
+                    aria-hidden="true"
+                  />
                 )}
                 <Icon
                   className={cn(
                     "h-4 w-4 shrink-0 transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-foreground"
                   )}
                   aria-hidden="true"
                 />
@@ -140,17 +168,16 @@ function SidebarContent({ role, userName = "Alex Johnson", userEmail = "alex@ath
             <p className="text-sm font-medium text-foreground truncate">{userName}</p>
             <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
           </div>
+          <NotificationBell />
         </div>
         <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-          asChild
+          onClick={() => signOut({ callbackUrl: "/login" })}
         >
-          <Link href="/login">
-            <LogOut className="h-4 w-4" aria-hidden="true" />
-            Sign out
-          </Link>
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+          Sign out
         </Button>
       </div>
     </div>
@@ -172,7 +199,11 @@ export function Sidebar({ role, userName, userEmail, userImage }: SidebarProps) 
         className="fixed top-4 left-4 z-50 flex h-9 w-9 items-center justify-center rounded-lg bg-card border border-border shadow-lg lg:hidden"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {mobileOpen ? <X className="h-4 w-4" aria-hidden="true" /> : <Menu className="h-4 w-4" aria-hidden="true" />}
+        {mobileOpen ? (
+          <X className="h-4 w-4" aria-hidden="true" />
+        ) : (
+          <Menu className="h-4 w-4" aria-hidden="true" />
+        )}
       </button>
 
       {/* Mobile overlay */}
